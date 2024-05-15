@@ -8,7 +8,7 @@
 #include "duckdb/common/vector_operations/generic_executor.hpp"
 
 #include "duckdb/function/scalar_function.hpp"
-
+#include "duckdb/main/extension_util.hpp"
 #include <duckdb/parser/parsed_data/create_scalar_function_info.hpp>
 
 namespace duckdb {
@@ -180,10 +180,11 @@ static void NormalizedAffineGapFunction(DataChunk &args, ExpressionState &state,
 }
 
 static void LoadInternal(DatabaseInstance &instance) {
-  Connection con(instance);
-  con.BeginTransaction();
+    auto affine_gap_scalar_function = ScalarFunction("affine_gap", {LogicalType::VARCHAR, LogicalType::VARCHAR},
+                     LogicalType::DOUBLE, AffineGapFunction);
+    ExtensionUtil::RegisterFunction(instance, affine_gap_scalar_function);
 
-  auto &catalog = Catalog::GetSystemCatalog(*con.context);
+	auto normalized_affine_gap_function = 
 
   ScalarFunctionSet affine_gap("affine_gap");
   affine_gap.AddFunction(
@@ -219,19 +220,24 @@ static void LoadInternal(DatabaseInstance &instance) {
   con.Commit();
 }
 
-void Affine_gapExtension::Load(DuckDB &db) { LoadInternal(*db.instance); }
-std::string Affine_gapExtension::Name() { return "affine_gap"; }
+void AffineGapExtension::Load(DuckDB &db) {
+	LoadInternal(*db.instance);
+}
+std::string AffineGapExtension::Name() {
+	return "affine_gap";
+}
 
 } // namespace duckdb
 
 extern "C" {
 
 DUCKDB_EXTENSION_API void affine_gap_init(duckdb::DatabaseInstance &db) {
-  LoadInternal(db);
+    duckdb::DuckDB db_wrapper(db);
+    db_wrapper.LoadExtension<duckdb::AffineGapExtension>();
 }
 
 DUCKDB_EXTENSION_API const char *affine_gap_version() {
-  return duckdb::DuckDB::LibraryVersion();
+	return duckdb::DuckDB::LibraryVersion();
 }
 }
 
