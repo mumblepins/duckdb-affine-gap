@@ -13,6 +13,17 @@ require affine_gap
 
 # Confirm the extension works
 query I
-SELECT affine_gap('Sam');
+SELECT affine_gap('Sam','SXM');
 ----
-Affine_gap Sam 🐥
+23.0
+
+
+query I
+SELECT normalized_affine_gap('sam','sam');
+----
+0.5
+
+query I
+SELECT normalized_affine_gap('sams','samx');
+----
+1.75

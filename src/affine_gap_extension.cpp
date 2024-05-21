@@ -7,6 +7,7 @@
 #include "duckdb/common/vector_operations/septenary_executor.hpp"
 #include "duckdb/common/vector_operations/generic_executor.hpp"
 
+#include "duckdb/function/function_set.hpp"
 #include "duckdb/function/scalar_function.hpp"
 #include "duckdb/main/extension_util.hpp"
 #include <duckdb/parser/parsed_data/create_scalar_function_info.hpp>
@@ -180,11 +181,6 @@ static void NormalizedAffineGapFunction(DataChunk &args, ExpressionState &state,
 }
 
 static void LoadInternal(DatabaseInstance &instance) {
-    auto affine_gap_scalar_function = ScalarFunction("affine_gap", {LogicalType::VARCHAR, LogicalType::VARCHAR},
-                     LogicalType::DOUBLE, AffineGapFunction);
-    ExtensionUtil::RegisterFunction(instance, affine_gap_scalar_function);
-
-	auto normalized_affine_gap_function = 
 
   ScalarFunctionSet affine_gap("affine_gap");
   affine_gap.AddFunction(
@@ -196,28 +192,41 @@ static void LoadInternal(DatabaseInstance &instance) {
        LogicalType::DOUBLE, LogicalType::DOUBLE, LogicalType::DOUBLE,
        LogicalType::DOUBLE},
       LogicalType::DOUBLE, AffineGapFunction));
-  CreateScalarFunctionInfo affine_gap_fun_info(affine_gap);
-
-  affine_gap_fun_info.on_conflict = OnCreateConflict::ALTER_ON_CONFLICT;
-  catalog.CreateFunction(*con.context, &affine_gap_fun_info);
-
-  ScalarFunctionSet normalized_affine_gap("normalized_affine_gap");
-  normalized_affine_gap.AddFunction(ScalarFunction(
-      "normalized_affine_gap", {LogicalType::VARCHAR, LogicalType::VARCHAR},
-      LogicalType::DOUBLE, NormalizedAffineGapFunction));
-  normalized_affine_gap.AddFunction(ScalarFunction(
-      "normalized_affine_gap",
-      {LogicalType::VARCHAR, LogicalType::VARCHAR, LogicalType::DOUBLE,
-       LogicalType::DOUBLE, LogicalType::DOUBLE, LogicalType::DOUBLE,
-       LogicalType::DOUBLE},
-      LogicalType::DOUBLE, NormalizedAffineGapFunction));
-  CreateScalarFunctionInfo normalized_affine_gap_fun_info(
-      normalized_affine_gap);
-
-  normalized_affine_gap_fun_info.on_conflict =
-      OnCreateConflict::ALTER_ON_CONFLICT;
-  catalog.CreateFunction(*con.context, &normalized_affine_gap_fun_info);
-  con.Commit();
+  ExtensionUtil::RegisterFunction(instance, affine_gap);
+  //        catalog.CreateFunction(*con.context, &affine_gap_fun_info);
+  //  affine_gap.AddFunction(
+  //      ScalarFunction("affine_gap", {LogicalType::VARCHAR,
+  //      LogicalType::VARCHAR},
+  //                     LogicalType::DOUBLE, AffineGapFunction));
+  //  affine_gap.AddFunction(ScalarFunction(
+  //      "affine_gap",
+  //      {LogicalType::VARCHAR, LogicalType::VARCHAR, LogicalType::DOUBLE,
+  //       LogicalType::DOUBLE, LogicalType::DOUBLE, LogicalType::DOUBLE,
+  //       LogicalType::DOUBLE},
+  //      LogicalType::DOUBLE, AffineGapFunction));
+  //  CreateScalarFunctionInfo affine_gap_fun_info(affine_gap);
+  //
+  //  affine_gap_fun_info.on_conflict = OnCreateConflict::ALTER_ON_CONFLICT;
+  //  catalog.CreateFunction(*con.context, &affine_gap_fun_info);
+  //
+    ScalarFunctionSet normalized_affine_gap("normalized_affine_gap");
+    normalized_affine_gap.AddFunction(ScalarFunction(
+        "normalized_affine_gap", {LogicalType::VARCHAR, LogicalType::VARCHAR},
+        LogicalType::DOUBLE, NormalizedAffineGapFunction));
+    normalized_affine_gap.AddFunction(ScalarFunction(
+        "normalized_affine_gap",
+        {LogicalType::VARCHAR, LogicalType::VARCHAR, LogicalType::DOUBLE,
+         LogicalType::DOUBLE, LogicalType::DOUBLE, LogicalType::DOUBLE,
+         LogicalType::DOUBLE},
+        LogicalType::DOUBLE, NormalizedAffineGapFunction));
+  ExtensionUtil::RegisterFunction(instance, normalized_affine_gap);
+  //  CreateScalarFunctionInfo normalized_affine_gap_fun_info(
+  //      normalized_affine_gap);
+  //
+  //  normalized_affine_gap_fun_info.on_conflict =
+  //      OnCreateConflict::ALTER_ON_CONFLICT;
+  //  catalog.CreateFunction(*con.context, &normalized_affine_gap_fun_info);
+  //  con.Commit();
 }
 
 void AffineGapExtension::Load(DuckDB &db) {
