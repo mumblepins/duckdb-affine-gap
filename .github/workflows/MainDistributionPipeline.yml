@@ -14,9 +14,14 @@ concurrency:
 jobs:
   duckdb-stable-build:
     name: Build extension binaries
-    uses: duckdb/extension-ci-tools/.github/workflows/_extension_distribution.yml@v0.10.2
+    uses: duckdb/extension-ci-tools/.github/workflows/_extension_distribution.yml@${{matrix.version}}
+    strategy:
+      matrix:
+        version:
+          - v0.10.2
+          - v0.10.3
     with:
-      duckdb_version: v0.10.2
+      duckdb_version: ${{ matrix.version }}
       extension_name: affine_gap
       exclude_archs: windows_amd64;windows_amd64_rtools;osx_amd64;osx_arm64;wasm_mvp;wasm_eh;wasm_threads
 
